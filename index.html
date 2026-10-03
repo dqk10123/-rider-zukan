@@ -1,46 +1,46 @@
 <!doctype html>
-<html lang="ja">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#111111">
-<link rel="manifest" href="manifest.webmanifest">
-<title>ライダー図鑑</title>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#ffffff"><link rel="manifest" href="manifest.webmanifest"><title>ライダー図鑑</title>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;background:#f4f4f4;color:#171717}
-header{background:#111;color:white;padding:16px;display:flex;justify-content:space-between;align-items:center}h1{font-size:22px;margin:0}
-main{max-width:760px;margin:auto;padding:14px 14px 90px}.tabs{display:flex;gap:8px;overflow:auto;margin-bottom:12px}
-button{min-height:44px;border:1px solid #bbb;border-radius:12px;background:white;font-weight:700;padding:10px 12px}
-.card{background:white;border-radius:16px;padding:14px;margin-bottom:10px;border-left:7px solid #f08a24}
-.item{display:flex;justify-content:space-between;gap:10px;align-items:center;border:1px solid #ddd;border-radius:12px;padding:11px;margin:8px 0}
-.item.owned{border-color:#2e7d32;background:#f2fff4}.muted{color:#666;font-size:13px}.hidden{display:none}
-nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #ddd;display:flex;justify-content:space-around;padding:8px 6px calc(8px + env(safe-area-inset-bottom))}
-</style>
-</head>
-<body>
-<header><h1>ライダー図鑑</h1><b>コイン <span id="coins">0</span></b></header>
-<main id="app"></main>
-<nav><button onclick="home()">図鑑</button><button onclick="wishlist()">欲しい物</button><button onclick="room()">部屋</button></nav>
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;background:#f3f5f7;color:#18212b}button,input,select{font:inherit}button{min-height:44px}header{position:sticky;top:0;z-index:5;background:#fff;border-bottom:2px solid #243447;padding:12px}.head{max-width:900px;margin:auto;display:flex;justify-content:space-between;align-items:center}.coins{background:#ffd84d;border:2px solid #9a7600;border-radius:999px;padding:8px 12px;font-weight:900}main{max-width:900px;margin:auto;padding:14px 14px 80px}.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}.tabs button,.pill,.btn{border:2px solid #9ba7b2;border-radius:14px;background:#fff;padding:10px;font-weight:800;color:#18212b}.tabs button.active,.pill.active{outline:3px solid #18212b;outline-offset:1px}.panel{background:#fff;border:2px solid #c7cfd7;border-radius:22px;padding:15px}.stack{display:grid;gap:12px}.sub{font-size:13px;color:#52606d}.control{width:100%;border:2px solid #9ba7b2;border-radius:14px;padding:12px;background:#fff;font-size:16px}.filters{display:flex;gap:8px;overflow:auto}.pill{border-radius:999px;white-space:nowrap}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.rider{border:3px solid var(--c);background:#fff;border-radius:16px;padding:12px;text-align:left}.mark{float:right;border:3px solid var(--c);color:var(--c);border-radius:999px;padding:5px 8px;font-weight:900}.item{border:2px solid #b5bdc5;background:#f1f3f5;border-radius:14px;padding:10px}.item.owned{border:3px solid var(--c);background:#fff}.actions{display:flex;gap:6px;margin-top:8px}.mini{flex:1;border:2px solid #9ba7b2;border-radius:10px;background:#fff;padding:7px;font-weight:800}.wish.on{background:#fff2a8;border-color:#a88719}.notice{border:2px solid #c5ced6;border-radius:14px;padding:10px;background:#f8fafb;font-size:13px}.room{min-height:240px;border:2px solid #aebbb2;border-radius:18px;background:#f3f7f4;display:flex;align-items:center;justify-content:center;text-align:center}.roommark{width:94px;height:94px;border:5px solid var(--c);color:var(--c);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;margin:auto auto 8px}.shop,.quote{border:2px solid #c5ced6;border-radius:14px;padding:12px;background:#fff}.quote{display:flex;justify-content:space-between;align-items:center;gap:8px}@media(min-width:700px){.tabs{grid-template-columns:repeat(6,1fr)}.grid{grid-template-columns:repeat(3,1fr)}}
+</style></head><body>
+<header><div class="head"><div><b style="font-size:22px">ライダー図鑑</b><div class="sub">家庭内用・試作版</div></div><div class="coins">コイン <span id="coins">0</span></div></div></header>
+<main><div class="tabs"><button data-t="0">ホーム</button><button data-t="1">図鑑</button><button data-t="2">ベルト</button><button data-t="3">自作</button><button data-t="4">ショップ</button><button data-t="5">名言</button></div><div id="screen"></div></main>
 <script>
-const riders=[
-{name:"仮面ライダー1号",era:"昭和",color:"#2e7d32",items:["変身ベルト","サイクロン号"]},
-{name:"仮面ライダーV3",era:"昭和",color:"#c62828",items:["ダブルタイフーン","ハリケーン"]},
-{name:"仮面ライダーゴースト",era:"平成",color:"#f08a24",items:["ゴーストドライバー","オレゴーストアイコン","ムサシゴーストアイコン","ガンガンセイバー"]},
-{name:"仮面ライダービルド",era:"平成",color:"#1565c0",items:["ビルドドライバー","ラビットフルボトル","タンクフルボトル","ハザードトリガー","ジーニアスフルボトル"]},
-{name:"仮面ライダーゼロワン",era:"令和",color:"#b7d629",items:["飛電ゼロワンドライバー","プログライズキー","アタッシュカリバー"]},
-{name:"仮面ライダーギーツ",era:"令和",color:"#d32f2f",items:["デザイアドライバー","マグナムレイズバックル","ブーストレイズバックル"]},
-{name:"仮面ライダーガッチャード",era:"令和",color:"#1976d2",items:["ガッチャードライバー","ライドケミーカード","ガッチャージガン"]},
-{name:"仮面ライダーガヴ",era:"令和",color:"#7b1fa2",items:["変身ベルト","ゴチゾウ","武器アイテム"]}
-];
-let s=JSON.parse(localStorage.getItem("rz")||'{"coins":0,"owned":{},"wish":{}}');
-const save=()=>{localStorage.setItem("rz",JSON.stringify(s));document.getElementById("coins").textContent=s.coins};
-const key=(r,i)=>r.name+"::"+i;
-function home(){document.getElementById("app").innerHTML='<h2>図鑑</h2>'+riders.map((r,n)=>`<div class="card" style="border-left-color:${r.color}" onclick="detail(${n})"><b>${r.name}</b><div class="muted">${r.era}　所持 ${r.items.filter((x,i)=>s.owned[key(r,i)]).length}/${r.items.length}</div></div>`).join("");save()}
-function detail(n){let r=riders[n];document.getElementById("app").innerHTML=`<button onclick="home()">←戻る</button><h2 style="color:${r.color}">${r.name}</h2>`+r.items.map((it,i)=>{let k=key(r,i),o=s.owned[k],w=s.wish[k];return `<div class="item ${o?'owned':''}"><div><b>${it}</b><div class="muted">${o?'所持':'未所持'} ${w?'⭐欲しい':''}</div></div><div><button onclick="wish('${k}',${n})">⭐</button> <button onclick="own('${k}',${n})">${o?'取消':'写真登録'}</button></div></div>`}).join("")}
-function own(k,n){if(s.owned[k])delete s.owned[k];else{s.owned[k]=1;s.coins+=5}save();detail(n)}
-function wish(k,n){s.wish[k]=!s.wish[k];save();detail(n)}
-function wishlist(){let a=[];riders.forEach((r,n)=>r.items.forEach((it,i)=>{if(s.wish[key(r,i)])a.push(`<div class="item"><div><b>${it}</b><div class="muted">${r.name}</div></div></div>`)}));document.getElementById("app").innerHTML="<h2>欲しい物</h2>"+(a.join("")||"<p>まだありません</p>")}
-function room(){document.getElementById("app").innerHTML=`<h2>部屋</h2><div class="card"><b>現在のコイン：${s.coins}</b><p class="muted">家具・ポスター・名言などは次の更新で追加できます。</p></div>`}
-save();home();if("serviceWorker" in navigator)navigator.serviceWorker.register("./service-worker.js");
-</script>
-</body></html>
+const eraData={
+"昭和":["仮面ライダー1号","仮面ライダー2号","仮面ライダーV3","ライダーマン","仮面ライダーX","仮面ライダーアマゾン","仮面ライダーストロンガー","スカイライダー","仮面ライダースーパー1","仮面ライダーZX","仮面ライダーBLACK","シャドームーン","仮面ライダーBLACK RX","仮面ライダーシン","仮面ライダーZO","仮面ライダーJ"],
+"平成":["仮面ライダークウガ","仮面ライダーアギト","仮面ライダーG3","仮面ライダーギルス","アナザーアギト","仮面ライダー龍騎","仮面ライダーナイト","仮面ライダーゾルダ","仮面ライダー王蛇","仮面ライダーファイズ","仮面ライダーカイザ","仮面ライダーデルタ","仮面ライダーブレイド","仮面ライダーギャレン","仮面ライダーカリス","仮面ライダーレンゲル","仮面ライダー響鬼","仮面ライダー威吹鬼","仮面ライダーカブト","仮面ライダーガタック","仮面ライダー電王","仮面ライダーゼロノス","仮面ライダーキバ","仮面ライダーイクサ","仮面ライダーディケイド","仮面ライダーディエンド","仮面ライダーW","仮面ライダーアクセル","仮面ライダーオーズ","仮面ライダーバース","仮面ライダーフォーゼ","仮面ライダーメテオ","仮面ライダーウィザード","仮面ライダービースト","仮面ライダー鎧武","仮面ライダーバロン","仮面ライダードライブ","仮面ライダーマッハ","仮面ライダーゴースト","仮面ライダースペクター","仮面ライダーネクロム","仮面ライダーエグゼイド","仮面ライダーブレイブ","仮面ライダースナイプ","仮面ライダーレーザー","仮面ライダーゲンム","仮面ライダーパラドクス","仮面ライダークロノス","仮面ライダービルド","仮面ライダークローズ","仮面ライダーグリス","仮面ライダーローグ","仮面ライダーエボル","仮面ライダージオウ","仮面ライダーゲイツ","仮面ライダーウォズ"],
+"令和":["仮面ライダーゼロワン","仮面ライダーバルカン","仮面ライダーバルキリー","仮面ライダー迅","仮面ライダー滅","仮面ライダーサウザー","仮面ライダーセイバー","仮面ライダーブレイズ","仮面ライダーエスパーダ","仮面ライダーリバイ","仮面ライダーバイス","仮面ライダーライブ","仮面ライダーエビル","仮面ライダージャンヌ","仮面ライダーデモンズ","仮面ライダーギーツ","仮面ライダータイクーン","仮面ライダーナーゴ","仮面ライダーバッファ","仮面ライダーパンクジャック","仮面ライダーガッチャード","仮面ライダーマジェード","仮面ライダーヴァルバラド","仮面ライダードレッド","仮面ライダーガヴ","仮面ライダーヴァレン","仮面ライダーゼッツ","仮面ライダーマイス"]};
+const special={
+"仮面ライダー1号":{c:"#3f8f5c",m:"1",n:70,items:["タイフーン","サイクロン号"]},
+"仮面ライダー2号":{c:"#c94141",m:"2",n:70,items:["タイフーン","新サイクロン号"]},
+"仮面ライダーV3":{c:"#2c8a4b",m:"V3",n:70,items:["ダブルタイフーン","V3ホッパー","ハリケーン"]},
+"仮面ライダーゴースト":{c:"#f08a24",m:"GHOST",n:93,items:["ゴーストドライバー","オレゴーストアイコン","ムサシゴーストアイコン","エジソンゴーストアイコン","ロビンゴーストアイコン","ガンガンセイバー","サングラスラッシャー"]},
+"仮面ライダービルド":{c:"#d34242",m:"BUILD",n:135,items:["ビルドドライバー","ラビットフルボトル","タンクフルボトル","ハザードトリガー","フルフルラビットタンクボトル","ジーニアスフルボトル","ドリルクラッシャー","フルボトルバスター"]},
+"仮面ライダージオウ":{c:"#c766a8",m:"ZI-O",n:120},
+"仮面ライダーゼロワン":{c:"#a8cf20",m:"01",n:90,items:["飛電ゼロワンドライバー","ライジングホッパープログライズキー","アタッシュカリバー"]},
+"仮面ライダーセイバー":{c:"#c64040",m:"S",n:100},
+"仮面ライダーギーツ":{c:"#df4040",m:"GEATS",n:110,items:["デザイアドライバー","マグナムレイズバックル","ブーストレイズバックル","マグナムシューター40X"]},
+"仮面ライダーガッチャード":{c:"#2d84c7",m:"GOT",n:118,items:["ガッチャードライバー","ライドケミーカード","ガッチャージガン","エクスガッチャリバー"]},
+"仮面ライダーガヴ":{c:"#8257b4",m:"GAVV",n:92,items:["変身ベルト ガヴ","ゴチゾウ","ガヴガブレイド"]},
+"仮面ライダーゼッツ":{c:"#475f9b",m:"ZZ",n:70},
+"仮面ライダーマイス":{c:"#5265ad",m:"MY",n:60}
+};
+const defaults={"昭和":"#627d68","平成":"#6b79a6","令和":"#6d8a75"};
+let idx=0;const riders=[];Object.entries(eraData).forEach(([era,names])=>names.forEach(name=>{const s=special[name]||{},n=s.n||60,seed=s.items||[];riders.push({id:"r"+idx++,era,name,color:s.c||defaults[era],mark:s.m||name.replace("仮面ライダー","").slice(0,3),items:Array.from({length:n},(_,i)=>seed[i]||"アイテム "+String(i+1).padStart(3,"0")+"（試作枠）")})}));
+let st=JSON.parse(localStorage.getItem("rzFullV2")||'{"coins":0,"owned":{},"rewarded":{},"wish":{},"custom":[],"inventory":[],"room":[],"roomRider":""}');
+const $=s=>document.querySelector(s),save=()=>{localStorage.setItem("rzFullV2",JSON.stringify(st));$("#coins").textContent=st.coins},key=(r,i)=>r.id+"::"+i,all=()=>riders.concat(st.custom),get=id=>all().find(r=>r.id===id);
+let tab=1,era="全部",rid="",want=false,invKind="家具";
+function setTab(n){tab=n;document.querySelectorAll(".tabs button").forEach((b,i)=>b.classList.toggle("active",i===n));[home,zukan,belt,create,shop,quotes][n]()}
+document.querySelectorAll(".tabs button").forEach((b,i)=>b.onclick=()=>setTab(i));
+function home(){const r=get(st.roomRider),opts=['<option value="">ライダー未選択</option>','<option value="all">全ライダー</option>',...all().map(x=>'<option value="'+x.id+'" '+(st.roomRider===x.id?'selected':'')+'>'+x.name+'</option>')].join("");$("#screen").innerHTML='<div class="panel stack"><b style="font-size:20px">マイルーム</b><div class="sub">好きなライダーを1人表示。家具・飾りは最大10個。</div><select id="roomsel" class="control">'+opts+'</select><div class="room">'+(st.roomRider==="all"?'<div><div class="roommark" style="--c:#18212b">ALL</div><b>全ライダー</b></div>':r?'<div><div class="roommark" style="--c:'+r.color+'">'+r.mark+'</div><b>'+r.name+'</b></div>':'<b>ライダー未選択</b>')+'</div><div class="filters">'+["家具","ポスター","マーク"].map(k=>'<button class="pill '+(invKind===k?'active':'')+'" data-k="'+k+'">'+k+'</button>').join("")+'</div><div class="notice">部屋に配置中 '+st.room.length+' / 10</div></div>';$("#roomsel").onchange=e=>{st.roomRider=e.target.value;save();home()};document.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{invKind=b.dataset.k;home()})}
+function zukan(){if(rid){riderPage();return}const q="";const rs=all().filter(r=>era==="全部"||r.era===era);$("#screen").innerHTML='<div class="panel stack"><b style="font-size:20px">図鑑</b><div class="sub">持っている物はカラー、持っていない物は灰色。ライダーごとのイメージカラーで表示。</div><input id="q" class="control" placeholder="ライダー名・アイテム名を検索"><div class="filters">'+["全部","昭和","平成","令和"].map(e=>'<button class="pill '+(era===e?'active':'')+'" data-e="'+e+'">'+e+'</button>').join("")+'<button id="want" class="pill '+(want?'active':'')+'">欲しい物だけ</button></div><div id="rgrid" class="grid">'+cards(rs)+'</div></div>';document.querySelectorAll("[data-e]").forEach(b=>b.onclick=()=>{era=b.dataset.e;zukan()});$("#want").onclick=()=>{want=!want;zukan()};$("#q").oninput=e=>{const v=e.target.value;$("#rgrid").innerHTML=cards(all().filter(r=>(era==="全部"||r.era===era)&&(r.name.includes(v)||r.items.some(x=>x.includes(v)))));bindCards()};bindCards()}
+function cards(rs){return rs.map(r=>'<button class="rider" data-r="'+r.id+'" style="--c:'+r.color+'"><span class="mark">'+r.mark+'</span><b>'+r.name+'</b><div class="sub" style="margin-top:20px">'+r.era+'・所持 '+r.items.filter((_,i)=>st.owned[key(r,i)]).length+'/'+r.items.length+'</div></button>').join("")}
+function bindCards(){document.querySelectorAll(".rider").forEach(b=>b.onclick=()=>{rid=b.dataset.r;riderPage()})}
+function riderPage(){const r=get(rid);if(!r){rid="";zukan();return}const rows=r.items.map((name,i)=>({name,i,k:key(r,i)})).filter(x=>!want||st.wish[x.k]);$("#screen").innerHTML='<div class="stack"><button id="back" class="btn">← ライダー一覧</button><div class="panel" style="border:3px solid '+r.color+'"><span class="mark" style="--c:'+r.color+'">'+r.mark+'</span><b style="font-size:19px">'+r.name+'</b><div class="sub">全 '+r.items.length+' 件</div></div><button id="wp" class="pill '+(want?'active':'')+'">欲しい物だけ</button><div class="grid">'+rows.map(x=>'<div class="item '+(st.owned[x.k]?'owned':'')+'" style="--c:'+r.color+'"><b>'+x.name+'</b><div class="sub">'+(st.owned[x.k]?'所持':'未所持')+(st.wish[x.k]?'・★ 欲しい':'')+'</div><div class="actions"><button class="mini wish '+(st.wish[x.k]?'on':'')+'" data-k="'+x.k+'">★</button><button class="mini own" data-k="'+x.k+'">'+(st.owned[x.k]?'登録取消':'写真で登録')+'</button></div></div>').join("")+'</div></div>';$("#back").onclick=()=>{rid="";zukan()};$("#wp").onclick=()=>{want=!want;riderPage()};document.querySelectorAll(".wish").forEach(b=>b.onclick=()=>{st.wish[b.dataset.k]=!st.wish[b.dataset.k];save();riderPage()});document.querySelectorAll(".own").forEach(b=>b.onclick=()=>{const k=b.dataset.k;if(st.owned[k])delete st.owned[k];else if(confirm("写真で確認して『持っている』に登録しますか？\n試作版では写真自体は保存しません。")){st.owned[k]=1;if(!st.rewarded[k]){st.rewarded[k]=1;st.coins+=5}}save();riderPage()})}
+function belt(){const owned=[];all().forEach(r=>r.items.forEach((x,i)=>{if(st.owned[key(r,i)])owned.push({r,x})}));$("#screen").innerHTML='<div class="panel stack"><b style="font-size:20px">ベルト</b><div class="sub">登録したアイテムをセットして遊ぶ試作です。</div><select id="br" class="control"><option value="">使うライダーを選択</option><option value="all">全ライダー</option>'+all().map(r=>'<option value="'+r.id+'">'+r.name+'</option>').join("")+'</select><div class="room"><b>BELT</b></div><div id="bm" class="notice">ライダーを選んでね。</div><div class="grid">'+(owned.length?owned.map(o=>'<div class="item owned" style="--c:'+o.r.color+'"><b>'+o.x+'</b><div class="sub">'+o.r.name+'</div><button class="mini sb" data-r="'+o.r.id+'" data-n="'+o.x+'">セット</button></div>').join(""):'<div class="notice">図鑑で所持登録するとここに出ます。</div>')+'</div></div>';document.querySelectorAll(".sb").forEach(b=>b.onclick=()=>{const v=$("#br").value;if(!v){$("#bm").textContent="先にライダーを選んでね。";return}if(v==="all"||v===b.dataset.r)$("#bm").textContent=b.dataset.n+" セット！ 変身演出（試作）";else $("#bm").textContent="これは "+get(b.dataset.r).name+" に使ってね。"})}
+function create(){ $("#screen").innerHTML='<div class="panel stack"><b style="font-size:20px">自作アイテム</b><input id="cn" class="control" placeholder="アイテム名"><select id="cr" class="control"><option value="">使うライダーを選択</option><option value="all">全ライダー</option>'+all().map(r=>'<option value="'+r.id+'">'+r.name+'</option>').join("")+'</select><button id="add" class="pill active">作る</button><div id="cm" class="notice">まだ作っていません。</div></div>';$("#add").onclick=()=>{const n=$("#cn").value.trim(),v=$("#cr").value;if(!n||!v){$("#cm").textContent="名前とライダーを選んでね。";return}if(v==="all"){let r=st.custom.find(x=>x.id==="custom-all");if(!r){r={id:"custom-all",era:"自作",name:"全ライダー対応・自作",mark:"ALL",color:"#555",items:[]};st.custom.push(r)}r.items.push(n)}else get(v).items.push(n);save();$("#cm").textContent=n+" を追加したよ。"}}
+const goods=[["ライダーランプ","家具",10],["コレクション棚","家具",15],["映画ポスター","ポスター",10],["ライダーマーク","マーク",5]];
+function shop(){ $("#screen").innerHTML='<div class="panel stack"><b style="font-size:20px">ショップ</b><div class="sub">初めて所持登録すると5コイン。買った物は売れません。</div><div class="grid">'+goods.map((g,i)=>'<div class="shop"><b>'+g[0]+'</b><div class="sub">'+g[1]+'</div><p>'+g[2]+'コイン</p><button class="mini buy" data-i="'+i+'">買う</button></div>').join("")+'</div></div>';document.querySelectorAll(".buy").forEach(b=>b.onclick=()=>{const g=goods[+b.dataset.i];if(st.coins<g[2])return alert("コインが足りないよ。");st.coins-=g[2];st.inventory.push({uid:"g"+Date.now(),name:g[0],kind:g[1]});save();shop()})}
+function quotes(){ $("#screen").innerHTML='<div class="panel stack"><b style="font-size:20px">名言</b><div class="sub">そのライダーのアイテムを全部そろえると解放。</div>'+all().map(r=>{const ok=r.items.every((_,i)=>st.owned[key(r,i)]);return '<div class="quote" style="border-color:'+(ok?r.color:'#c5ced6')+'"><div><b>'+r.name+'</b><div class="sub">'+(ok?'解放済み':'未解放')+'</div></div><button class="mini" '+(ok?'':'disabled')+'>'+(ok?'再生':'コンプリートで解放')+'</button></div>'}).join("")+'<div class="notice">本家音声はこの試作には入れていません。家庭内で用意した音声を後から設定できます。</div></div>'}
+save();setTab(1);if("serviceWorker" in navigator)navigator.serviceWorker.register("./service-worker.js");
+</script></body></html>
