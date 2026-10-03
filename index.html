@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111111">
+<link rel="manifest" href="manifest.webmanifest">
+<title>ライダー図鑑</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;background:#f4f4f4;color:#171717}
+header{background:#111;color:white;padding:16px;display:flex;justify-content:space-between;align-items:center}h1{font-size:22px;margin:0}
+main{max-width:760px;margin:auto;padding:14px 14px 90px}.tabs{display:flex;gap:8px;overflow:auto;margin-bottom:12px}
+button{min-height:44px;border:1px solid #bbb;border-radius:12px;background:white;font-weight:700;padding:10px 12px}
+.card{background:white;border-radius:16px;padding:14px;margin-bottom:10px;border-left:7px solid #f08a24}
+.item{display:flex;justify-content:space-between;gap:10px;align-items:center;border:1px solid #ddd;border-radius:12px;padding:11px;margin:8px 0}
+.item.owned{border-color:#2e7d32;background:#f2fff4}.muted{color:#666;font-size:13px}.hidden{display:none}
+nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #ddd;display:flex;justify-content:space-around;padding:8px 6px calc(8px + env(safe-area-inset-bottom))}
+</style>
+</head>
+<body>
+<header><h1>ライダー図鑑</h1><b>コイン <span id="coins">0</span></b></header>
+<main id="app"></main>
+<nav><button onclick="home()">図鑑</button><button onclick="wishlist()">欲しい物</button><button onclick="room()">部屋</button></nav>
+<script>
+const riders=[
+{name:"仮面ライダー1号",era:"昭和",color:"#2e7d32",items:["変身ベルト","サイクロン号"]},
+{name:"仮面ライダーV3",era:"昭和",color:"#c62828",items:["ダブルタイフーン","ハリケーン"]},
+{name:"仮面ライダーゴースト",era:"平成",color:"#f08a24",items:["ゴーストドライバー","オレゴーストアイコン","ムサシゴーストアイコン","ガンガンセイバー"]},
+{name:"仮面ライダービルド",era:"平成",color:"#1565c0",items:["ビルドドライバー","ラビットフルボトル","タンクフルボトル","ハザードトリガー","ジーニアスフルボトル"]},
+{name:"仮面ライダーゼロワン",era:"令和",color:"#b7d629",items:["飛電ゼロワンドライバー","プログライズキー","アタッシュカリバー"]},
+{name:"仮面ライダーギーツ",era:"令和",color:"#d32f2f",items:["デザイアドライバー","マグナムレイズバックル","ブーストレイズバックル"]},
+{name:"仮面ライダーガッチャード",era:"令和",color:"#1976d2",items:["ガッチャードライバー","ライドケミーカード","ガッチャージガン"]},
+{name:"仮面ライダーガヴ",era:"令和",color:"#7b1fa2",items:["変身ベルト","ゴチゾウ","武器アイテム"]}
+];
+let s=JSON.parse(localStorage.getItem("rz")||'{"coins":0,"owned":{},"wish":{}}');
+const save=()=>{localStorage.setItem("rz",JSON.stringify(s));document.getElementById("coins").textContent=s.coins};
+const key=(r,i)=>r.name+"::"+i;
+function home(){document.getElementById("app").innerHTML='<h2>図鑑</h2>'+riders.map((r,n)=>`<div class="card" style="border-left-color:${r.color}" onclick="detail(${n})"><b>${r.name}</b><div class="muted">${r.era}　所持 ${r.items.filter((x,i)=>s.owned[key(r,i)]).length}/${r.items.length}</div></div>`).join("");save()}
+function detail(n){let r=riders[n];document.getElementById("app").innerHTML=`<button onclick="home()">←戻る</button><h2 style="color:${r.color}">${r.name}</h2>`+r.items.map((it,i)=>{let k=key(r,i),o=s.owned[k],w=s.wish[k];return `<div class="item ${o?'owned':''}"><div><b>${it}</b><div class="muted">${o?'所持':'未所持'} ${w?'⭐欲しい':''}</div></div><div><button onclick="wish('${k}',${n})">⭐</button> <button onclick="own('${k}',${n})">${o?'取消':'写真登録'}</button></div></div>`}).join("")}
+function own(k,n){if(s.owned[k])delete s.owned[k];else{s.owned[k]=1;s.coins+=5}save();detail(n)}
+function wish(k,n){s.wish[k]=!s.wish[k];save();detail(n)}
+function wishlist(){let a=[];riders.forEach((r,n)=>r.items.forEach((it,i)=>{if(s.wish[key(r,i)])a.push(`<div class="item"><div><b>${it}</b><div class="muted">${r.name}</div></div></div>`)}));document.getElementById("app").innerHTML="<h2>欲しい物</h2>"+(a.join("")||"<p>まだありません</p>")}
+function room(){document.getElementById("app").innerHTML=`<h2>部屋</h2><div class="card"><b>現在のコイン：${s.coins}</b><p class="muted">家具・ポスター・名言などは次の更新で追加できます。</p></div>`}
+save();home();if("serviceWorker" in navigator)navigator.serviceWorker.register("./service-worker.js");
+</script>
+</body></html>
