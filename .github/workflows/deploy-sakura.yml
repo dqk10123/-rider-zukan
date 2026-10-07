@@ -1,0 +1,45 @@
+name: Deploy to Sakura
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare deploy files
+        run: |
+          mkdir -p dist
+          cp index.html dist/
+          cp manifest.webmanifest dist/
+          cp service-worker.js dist/
+          cp icon-192.svg dist/
+          cp icon-512.svg dist/
+          if [ -f README.txt ]; then cp README.txt dist/; fi
+
+      - name: Install lftp
+        run: sudo apt-get update && sudo apt-get install -y lftp
+
+      - name: Deploy to Sakura via FTP
+        env:
+          FTP_HOST: ${{ secrets.SAKURA_FTP_HOST }}
+          FTP_USER: ${{ secrets.SAKURA_FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.SAKURA_FTP_PASSWORD }}
+        run: |
+          lftp -u "$FTP_USER","$FTP_PASSWORD" "ftp://$FTP_HOST" <<'LFTP_CMDS'
+          set cmd:fail-exit yes
+          set net:timeout 20
+          set net:max-retries 2
+          set net:reconnect-interval-base 1
+          set ftp:ssl-allow no
+          set ftp:passive-mode yes
+          mirror -R --delete --verbose ./dist/ www/apps/son2/rider-zukan/
+          bye
+          LFTP_CMDS
