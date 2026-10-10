@@ -41,8 +41,33 @@ function belt(){const owned=[];all().forEach(r=>r.items.forEach((x,i)=>{if(st.ow
 function create(){ $("#screen").innerHTML='<div class="panel stack"><b style="font-size:20px">自作アイテム</b><input id="cn" class="control" placeholder="アイテム名"><select id="cr" class="control"><option value="">使うライダーを選択</option><option value="all">全ライダー</option>'+all().map(r=>'<option value="'+r.id+'">'+r.name+'</option>').join("")+'</select><button id="add" class="pill active">作る</button><div id="cm" class="notice">まだ作っていません。</div></div>';$("#add").onclick=()=>{const n=$("#cn").value.trim(),v=$("#cr").value;if(!n||!v){$("#cm").textContent="名前とライダーを選んでね。";return}if(v==="all"){let r=st.custom.find(x=>x.id==="custom-all");if(!r){r={id:"custom-all",era:"自作",name:"全ライダー対応・自作",mark:"ALL",color:"#555",items:[]};st.custom.push(r)}r.items.push(n)}else get(v).items.push(n);save();$("#cm").textContent=n+" を追加したよ。"}}
 const goods=[["ベッド","家具",15,"🛏️"],["机","家具",10,"🪵"],["椅子","家具",8,"🪑"],["ライダーランプ","家具",10,"💡"],["コレクション棚","家具",15,"🗄️"],["映画ポスター","ポスター",10,"🎞️"],["ライダーマーク","マーク",5,"🔰"]];
 function shop(){ $("#screen").innerHTML='<div class="panel stack"><b style="font-size:20px">ショップ</b><div class="sub">初めて所持登録すると5コイン。買った物は売れません。</div><div class="grid">'+goods.map((g,i)=>'<div class="shop"><b>'+g[0]+'</b><div class="sub">'+g[1]+'</div><p>'+g[2]+'コイン</p><button class="mini buy" data-i="'+i+'">買う</button></div>').join("")+'</div></div>';document.querySelectorAll(".buy").forEach(b=>b.onclick=()=>{const g=goods[+b.dataset.i];if(st.coins<g[2])return alert("コインが足りないよ。");st.coins-=g[2];st.inventory.push({uid:"g"+Date.now()+Math.random(),name:g[0],kind:g[1],icon:g[3],dir:1});save();shop()})}
-function heroVoice(r){try{const A=window.AudioContext||window.webkitAudioContext;if(A){const c=new A(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=180;g.gain.value=.035;o.start();o.stop(c.currentTime+.12)}}catch(e){}if(!("speechSynthesis" in window))return alert("この端末では音声再生に対応していません。");speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(r.name+"。ここからが勝負だ！");u.lang="ja-JP";u.rate=.86;u.pitch=.72;u.volume=1;speechSynthesis.speak(u)}
-function quotes(){ $("#screen").innerHTML='<div class="panel stack"><b style="font-size:20px">名言</b><div class="sub">そのライダーのアイテムを5個集めると解放。再生するとオリジナルのヒーロー風ボイスが流れます。</div>'+all().map(r=>{const owned=r.items.filter((_,i)=>st.owned[key(r,i)]).length,ok=owned>=5;return '<div class="quote" style="border-color:'+(ok?r.color:'#c5ced6')+'"><div><b>'+r.name+'</b><div class="sub">'+(ok?'解放済み':owned+' / 5 個')+'</div></div><button class="mini qplay" data-r="'+r.id+'" '+(ok?'':'disabled')+'>'+(ok?'再生':'5個で解放')+'</button></div>'}).join("")+'<div class="notice">本編の俳優・キャラクター音声ではなく、端末の読み上げ機能を使ったオリジナルのヒーロー風ボイスです。</div></div>';document.querySelectorAll(".qplay").forEach(b=>b.onclick=()=>heroVoice(get(b.dataset.r)))}
+const emotionSamples=[
+ {name:"熱血",line:"絶対に負けない！",rate:1.22,pitch:1.24,pause:70,desc:"速め・高め・勢いよく"},
+ {name:"決意",line:"俺は、みんなを守る。",rate:0.87,pitch:0.76,pause:280,desc:"低め・ゆっくり・間を取る"},
+ {name:"静か",line:"まだ、終わっていない。",rate:0.72,pitch:0.9,pause:380,desc:"落ち着いた声・ゆっくり"}
+];
+function emotionVoice(r,n){
+ const sample=emotionSamples[n];if(!sample)return;
+ if(!("speechSynthesis" in window))return alert("この端末は音声読み上げに対応していません。");
+ const synth=window.speechSynthesis;synth.cancel();
+ const line=sample.line;
+ const parts=line.split(/(?<=[、。！])/u).filter(Boolean);
+ const utterances=parts.map((part,i)=>{
+   const u=new SpeechSynthesisUtterance(part);
+   u.lang="ja-JP";u.rate=sample.rate;u.pitch=sample.pitch;u.volume=1;
+   return u;
+ });
+ // All utterances are queued directly from the user's tap, so mobile speech engines
+ // do not lose their user activation.
+ utterances.forEach(u=>synth.speak(u));
+}
+function quotes(){
+ $("#screen").innerHTML='<div class="panel stack"><b style="font-size:20px">名言</b><div class="sub">アイテムを5個集めたライダーで、3種類の感情表現を試せます。</div>'+all().map(r=>{
+  const owned=r.items.filter((_,i)=>st.owned[key(r,i)]).length,ok=owned>=5;
+  return '<div class="quote" style="border-color:'+(ok?r.color:'#c5ced6')+';display:block"><b>'+r.name+'</b><div class="sub">'+(ok?'解放済み':owned+' / 5 個')+'</div>'+(ok?'<div class="stack" style="margin-top:10px">'+emotionSamples.map((v,i)=>'<div class="notice"><b>'+v.name+'</b>　'+v.line+'<div class="sub">'+v.desc+'</div><button class="mini qplay" style="margin-top:6px" data-r="'+r.id+'" data-em="'+i+'">▶ '+v.name+'を再生</button></div>').join("")+'</div>':'<div class="sub">5個で解放</div>')+'</div>';
+ }).join("")+'<div class="notice">声の変化はAndroidの音声エンジンにより異なります。これは端末読み上げの感情別比較版で、AI演技音声や本編の音声ではありません。</div></div>';
+ document.querySelectorAll(".qplay").forEach(b=>b.onclick=()=>emotionVoice(get(b.dataset.r),Number(b.dataset.em)));
+}
 
 save();setTab(1);if("serviceWorker" in navigator)navigator.serviceWorker.register("./service-worker.js");
 </script></body></html>
